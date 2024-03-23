@@ -1,37 +1,22 @@
-# vim-dokuwiki - a VIM syntax file for DokuWiki
+vim: fdl=3:
 
-## Install
+# vim-dokuwiki
 
-### Vim-Plug
-```
-Plug 'nblock/vim-dokuwiki'
-```
+## about this fork
+This is my fork of the excellent [vim-dokuwiki](https://github.com/nblock/vim-dokuwiki).
 
-### Manual
-1) copy [syntax/dokuwiki.vim](syntax/dokuwiki.vim) into your `~/.vim/syntax/`
-2) enable by issuing `:set ft=dokuwiki`
+I've just make a few changes to [$vfp/packs-cp/opt/vim-dokuwiki/syntax/dokuwiki.vim](https://github.com/harriott/vim-dokuwiki/blob/master/syntax/dokuwiki.vim).
 
-## Configuration
+## merging from nblock upstream
 
-### Manually enable syntax highlighting for certain filename patterns
-Add the following snippet to your vim configuration, in case you
-want to enable Dokuwiki syntax highlighting for all `*.txt` files:
+    git remote add upstream https://github.com/nblock/vim-dokuwiki
+    git remote -v                                # check remote locations
+    git fetch upstream                           # grab the changed upstream
+    git merge upstream/master -m 'merge message' # merges in the changes
+    rg HEAD                                      # ripgrep for any conflicts
+    in vim: /^<<<<<<< HEAD$\|^=======$\|^>>>>>>> upstream/master$
+    gic '1 commit behind'
+    git merge --abort                            # undo the merge
 
-    autocmd BufRead,BufNewFile *.txt       set filetype=dokuwiki
 
-### Comment highlighting
-If you want to enable the comment plugin highlighting, 
-assign any value to the `dokuwiki_comment` variable:
 
-    :let dokuwiki_comment=1
-
-To disable it use `:unlet`. Example:
-
-    :unlet dokuwiki_comment
-
-### Code block syntax highlighting
-Syntax highlighting in code blocks can be enabled by adding the appropriate 
-languages to the `dokuwiki_fenced_languages` variable in your vimrc.
-Example:
-
-    :let g:dokuwiki_fenced_languages = ['c', 'python', 'html']

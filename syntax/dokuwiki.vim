@@ -1,8 +1,8 @@
 " Vim syntax file
 " Language: dokuwiki
-" Last Change: 2022-02-08
+" Last Change: Sat 23 Mar 2024
 " Maintainer: Florian Preinstorfer <nblock@archlinux.org>
-" URL: https://github.com/nblock/vim-dokuwiki
+" URL: https://github.com/harriott/vim-dokuwiki
 " License: same as vim itself
 " Reference: http://www.dokuwiki.org/syntax
 " Credits:
@@ -12,6 +12,17 @@
 "   Vladimir Zhbanov <vzhbanov@gmail.com> -- a lot of patches
 "   Jonathan Beverley <jonathan.beverley@gmail.com> -- syntax, folding, etc
 "   Joseph Harriott <trohib@gmail.com> -- syntax fixes
+
+" =========================================================================================
+" $vfp/packs-cp/opt/vim-dokuwiki/syntax/dokuwiki.vim
+
+" My tweaks here are:
+"  DokuFoldText() removed - my folding's better done in my  $vimfiles/ftplugin/dokuwiki.vim
+"   (https://github.com/harriott/vimfiles/blob/master/ftplugin/dokuwiki.vim)
+"  some overzealous conceal patterns removed
+
+" diff this against the original  $GHrUse/CP/Vim/nblock-vim-dokuwiki/syntax/dokuwiki.vim
+" =========================================================================================
 
 " initial checks. See `:help 44.12`
 if !exists('main_syntax')
@@ -24,10 +35,7 @@ if !exists('main_syntax')
 endif
 
 
-""" Settings {{{
-" Use syntax-based folding
-setlocal foldmethod=syntax
-setlocal foldtext=DokuFoldText()
+""> 1 settings
 " Set shift width for indent
 setlocal shiftwidth=2
 " Set the tab key size to two spaces
@@ -36,6 +44,7 @@ setlocal softtabstop=2
 setlocal expandtab
 " Hide conceal text except when editing a line
 setlocal conceallevel=2
+" setl cole=0
 setlocal concealcursor=nc
 
 unlet! b:current_syntax
@@ -51,32 +60,7 @@ for s:type in map(copy(g:dokuwiki_fenced_languages),'matchstr(v:val,"[^=]*$")')
 endfor
 unlet! s:type
 
-" when real width = 78, and winwidth(0)=82 because of line numbers
-function! DokuFoldText()
-	" use user specified fillchar
-    "let l:foldchar = matchstr(&fillchars, 'fold:\zs.')
-    let l:foldchar = "=" " there isn't a local fillchars, and I don't want to change the global
-	let l:text = getline(v:foldstart)
-	" we assume 3 digits is enough width, wider looks a little odd, but that's it
-	let l:tail = printf("| %3d lines |%s", (v:foldend - v:foldstart + 1), repeat(l:foldchar, 3))
-
-	" winwidth() includes space for relativenumber, but I can't write there
-	let l:textSpace = winwidth(0) - strwidth(l:tail) - (&rnu ? &numberwidth : 0)
-
-	" if header is too long, truncate
-	if strwidth(l:text) > (l:textSpace)
-		let l:extender = "... ".repeat(l:foldchar, foldlevel(v:foldstart))
-		let l:text = strpart(l:text, 0, l:textSpace - strwidth(l:extender)) . l:extender
-	endif
-
-	" all the above is dealing with special cases, this is the payload
-	let l:padding = repeat(l:foldchar, l:textSpace - strwidth(l:text))
-
-	return l:text . l:padding . l:tail
-endfunction
-
-""" }}}
-""" Patterns {{{
+""> 2 patterns
 " Forced Linebreaks:
 syn match dokuwikiLinebreak /\(\\\\$\|\\\\ \)/
 
@@ -109,23 +93,11 @@ syn match dokuwikiSmiley "\(:-X\|:-|\|;-)\|m(\|\^_\^\|:?:\|:!:\)\|LOL\|FIXME\|DE
 
 " Entities: http://github.com/splitbrain/dokuwiki/blob/master/conf/entities.conf
 syn match dokuwikiEntities "<->" conceal cchar=↔
-syn match dokuwikiEntities "->" conceal cchar=→
 syn match dokuwikiEntities "<-\ze\([^>]\|$\)" conceal cchar=←
-syn match dokuwikiEntities "<=>" conceal cchar=⇔
-syn match dokuwikiEntities "=>" conceal cchar=⇒
-syn match dokuwikiEntities "<=\ze\([^>]\|$\)" conceal cchar=⇐
 
-syn match dokuwikiEntities "\( \|^\|\d\)\zsx\ze\d" conceal cchar=×
-syn match dokuwikiEntities "\C\d\zsx\ze\($\|\s\|[0-9A-Z]\)" conceal cchar=×
-
-syn match dokuwikiEntities "<<" conceal cchar=«
-syn match dokuwikiEntities ">>" conceal cchar=»
-syn match dokuwikiEntities "--\ze\([^-]\|$\)" conceal cchar=–
 syn match dokuwikiEntities "---\ze\([^-]\|$\)" conceal cchar=—
-syn match dokuwikiEntities "(c)" conceal cchar=©
 syn match dokuwikiEntities "(tm)" conceal cchar=™
 syn match dokuwikiEntities "(r)" conceal cchar=®
-syn match dokuwikiEntities "\.\.\." conceal cchar=…
 
 " Links: implicit, or [[target|optional link text]] or [[target|{{image file|optional caption}}]]
 " http://github.com/splitbrain/dokuwiki/blob/master/conf/scheme.conf
@@ -191,8 +163,7 @@ endif
 " Horizontal Line: ----
 syn match dokuwikiHorizontalLine "^\s\?----\+\s*$"
 
-""" }}}
-""" Clusters {{{
+""> 3 clusters
 " @dokuwikiTextItems are those that work well in-line
 syn cluster dokuwikiTextItems contains=dokuwikiBold,dokuwikiItalic,dokuwikiUnderlined,dokuwikiMonospaced,dokuwikiStrikethrough
 syn cluster dokuwikiTextItems add=dokuwikiSubscript,dokuwikiSuperscript,dokuwikiSmiley,dokuwikiEntities
@@ -205,8 +176,7 @@ syn cluster dokuwikiBlockItems add=@dokuwikiTextItems,dokuwikiCodeBlockPlain,dok
 " @dokuwikiNoneTextItem exists only for brevity
 syn cluster dokuwikiNoneTextItem contains=ALLBUT,@dokuwikiTextItems
 
-""" }}}
-""" Highlighting {{{
+""> 4 highlighting
 hi link dokuwikiLinebreak Keyword
 
 hi link dokuwikiNowiki Exception
@@ -260,9 +230,7 @@ hi link dokuwikiComment Comment
 
 hi link dokuwikiHorizontalLine NonText
 
-""" }}}
-
-" other half of initial checks
+""> 5 other half of initial checks
 let b:current_syntax = "dokuwiki"
 if main_syntax ==# 'dokuwiki'
   unlet main_syntax
